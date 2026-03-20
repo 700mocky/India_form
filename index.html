@@ -176,16 +176,25 @@
       </div>
     </div>
 
-    <!-- インタビューOKの場合のみ表示 -->
-    <div class="question" id="contactSection" style="display:none;">
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnSubmit" onclick="submitSection1()">送信する</button>
+    </div>
+  </div>
+
+  <!-- セクション2: インタビュー連絡先 -->
+  <div class="section" id="section2">
+    <h2>インタビューへのご協力</h2>
+    <p class="description">ご協力ありがとうございます。連絡のためメールアドレスをご記入ください。</p>
+    <div class="question">
       <label>お名前</label>
       <input type="text" class="input-text" id="userName" placeholder="山田 太郎">
-      <label style="margin-top: 12px;">連絡先（メールまたはLINE ID等）</label>
-      <input type="text" class="input-text" id="userContact" placeholder="example@mail.com">
     </div>
-
+    <div class="question">
+      <label>メールアドレス</label>
+      <input type="email" class="input-text" id="userContact" placeholder="example@mail.com">
+    </div>
     <div class="btn-row">
-      <button class="btn btn-primary" id="btnSubmit" onclick="submitForm()">送信する</button>
+      <button class="btn btn-primary" onclick="submitContact()">送信する</button>
     </div>
   </div>
 
@@ -278,52 +287,73 @@ document.querySelectorAll('input[name="canProvide"]').forEach(r => {
   });
 });
 
-document.querySelectorAll('input[name="interview"]').forEach(r => {
-  r.addEventListener('change', function() {
-    document.getElementById('contactSection').style.display =
-      this.value === 'yes' ? 'block' : 'none';
-  });
-});
-
 function handleSection0() {
   const val = document.querySelector('input[name="canProvide"]:checked').value;
   document.getElementById('section0').classList.remove('active');
   if (val === 'yes') {
     document.getElementById('section1').classList.add('active');
-    document.getElementById('progressBar').style.width = '50%';
+    document.getElementById('progressBar').style.width = '33%';
   } else {
     document.getElementById('sectionNo').classList.add('active');
     document.getElementById('progressBar').style.width = '100%';
   }
 }
 
-// ===== 送信 =====
-async function submitForm() {
+// 送信用のデータを保持
+let formPayload = {};
+
+// ===== セクション1の送信 =====
+async function submitSection1() {
   const btn = document.getElementById('btnSubmit');
   const price = document.querySelector('input[name="price"]:checked');
   const interview = document.querySelector('input[name="interview"]:checked');
 
-  // バリデーション
   if (!imageData.outer) { alert('名刺入れの外側の写真をアップロードしてください。'); return; }
   if (!imageData.inner) { alert('名刺入れの内側の写真をアップロードしてください。'); return; }
   if (!price) { alert('値段を選択してください。'); return; }
   if (!interview) { alert('インタビューの可否を選択してください。'); return; }
 
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>送信中...';
-
-  const payload = {
+  formPayload = {
     outerImage: imageData.outer,
     innerImage: imageData.inner,
     price: price.value,
     interview: interview.value,
-    name: document.getElementById('userName').value || '',
-    contact: document.getElementById('userContact').value || '',
+    name: '',
+    contact: '',
     timestamp: new Date().toLocaleString('ja-JP')
   };
 
+  if (interview.value === 'yes') {
+    // インタビューOK → 連絡先セクションへ
+    document.getElementById('section1').classList.remove('active');
+    document.getElementById('section2').classList.add('active');
+    document.getElementById('progressBar').style.width = '66%';
+  } else {
+    // インタビューNG → そのまま送信
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>送信中...';
+    await sendToGAS(formPayload, btn);
+  }
+}
+
+// ===== セクション2（連絡先）の送信 =====
+async function submitContact() {
+  const contact = document.getElementById('userContact').value;
+  if (!contact) { alert('メールアドレスを入力してください。'); return; }
+
+  formPayload.name = document.getElementById('userName').value || '';
+  formPayload.contact = contact;
+
+  const btn = event.target;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>送信中...';
+  await sendToGAS(formPayload, btn);
+}
+
+// ===== GASへ送信 =====
+async function sendToGAS(payload, btn) {
   try {
-    const res = await fetch(GAS_URL, {
+    await fetch(GAS_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
@@ -331,6 +361,7 @@ async function submitForm() {
     });
 
     document.getElementById('section1').classList.remove('active');
+    document.getElementById('section2').classList.remove('active');
     document.getElementById('sectionDone').classList.add('active');
     document.getElementById('progressBar').style.width = '100%';
   } catch (err) {
