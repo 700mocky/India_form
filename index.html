@@ -8,7 +8,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
-    background: linear-gradient(135deg, #ff9933 0%, #fff 33%, #138808 100%);
+    background: #fff5eb;
     min-height: 100vh;
     padding: 20px;
   }
@@ -59,7 +59,6 @@
   }
   .upload-area:hover, .upload-area.dragover { border-color: #ff9933; background: #fff8f0; }
   .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-  .upload-area .icon { font-size: 2rem; margin-bottom: 8px; }
   .upload-area .text { font-size: 0.85rem; color: #888; }
   .preview { margin-top: 12px; }
   .preview img { max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: contain; }
@@ -74,7 +73,6 @@
   .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
   .btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
   .end-screen { text-align: center; padding: 60px 24px; }
-  .end-screen .icon { font-size: 3rem; margin-bottom: 16px; }
   .end-screen h2 { font-size: 1.2rem; margin-bottom: 12px; color: #333; }
   .end-screen p { font-size: 0.9rem; color: #666; line-height: 1.6; }
   .progress { height: 4px; background: #eee; }
@@ -131,7 +129,6 @@
       <label>名刺入れの外側の写真をお願いします</label>
       <div class="upload-area" id="dropOuter">
         <input type="file" accept="image/*" capture="environment" onchange="handleImage(this, 'outer')">
-        <div class="icon">&#128247;</div>
         <div class="text">タップして写真を選択<br>またはドラッグ&ドロップ</div>
       </div>
       <div class="preview" id="previewOuter"></div>
@@ -141,7 +138,6 @@
       <label>名刺入れの内側の写真をお願いします</label>
       <div class="upload-area" id="dropInner">
         <input type="file" accept="image/*" capture="environment" onchange="handleImage(this, 'inner')">
-        <div class="icon">&#128247;</div>
         <div class="text">タップして写真を選択<br>またはドラッグ&ドロップ</div>
       </div>
       <div class="preview" id="previewInner"></div>
@@ -185,7 +181,6 @@
   <!-- 送信完了 -->
   <div class="section" id="sectionDone">
     <div class="end-screen">
-      <div class="icon">&#127881;</div>
       <h2>ご協力ありがとうございます！</h2>
       <p>皆さんの回答が、より良い商品開発に繋がります。<br>本当にありがとうございました。</p>
     </div>
@@ -194,7 +189,6 @@
   <!-- 写真なし終了 -->
   <div class="section" id="sectionNo">
     <div class="end-screen">
-      <div class="icon">&#128591;</div>
       <h2>ご回答ありがとうございます</h2>
       <p>お時間をいただきありがとうございました。<br>またの機会がございましたら、ぜひご協力をお願いいたします。</p>
     </div>
