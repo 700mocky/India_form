@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商品開発のためのユーザー調査 in インド</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+    background: linear-gradient(135deg, #ff9933 0%, #fff 33%, #138808 100%);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+  }
+  .header {
+    background: linear-gradient(90deg, #ff9933, #e67300);
+    color: #fff;
+    padding: 28px 24px;
+    text-align: center;
+  }
+  .header h1 { font-size: 1.3rem; margin-bottom: 8px; }
+  .header p { font-size: 0.85rem; line-height: 1.6; opacity: 0.95; }
+  .section { padding: 24px; display: none; }
+  .section.active { display: block; }
+  .section h2 { font-size: 1.1rem; margin-bottom: 16px; color: #333; border-left: 4px solid #ff9933; padding-left: 12px; }
+  .description { font-size: 0.9rem; line-height: 1.7; color: #555; margin-bottom: 24px; }
+  .note { font-size: 0.8rem; color: #888; line-height: 1.6; margin-top: 16px; background: #f9f9f9; padding: 12px; border-radius: 8px; }
+  .question { margin-bottom: 24px; }
+  .question label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; font-size: 0.95rem; }
+  .question .sub { font-weight: normal; font-size: 0.8rem; color: #888; }
+  .radio-group { display: flex; gap: 12px; flex-wrap: wrap; }
+  .radio-group label {
+    font-weight: normal;
+    display: flex; align-items: center; gap: 6px;
+    background: #f5f5f5; padding: 10px 18px; border-radius: 8px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .radio-group label:hover { background: #ffe0b2; }
+  .radio-group input:checked + span { color: #e67300; font-weight: bold; }
+  .select-group label {
+    font-weight: normal;
+    display: block; padding: 8px 14px; border-radius: 6px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .select-group label:hover { background: #fff3e0; }
+  .select-group input:checked + span { color: #e67300; font-weight: bold; }
+  .upload-area {
+    border: 2px dashed #ccc; border-radius: 12px; padding: 30px; text-align: center;
+    cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+  .upload-area:hover, .upload-area.dragover { border-color: #ff9933; background: #fff8f0; }
+  .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-area .icon { font-size: 2rem; margin-bottom: 8px; }
+  .upload-area .text { font-size: 0.85rem; color: #888; }
+  .preview { margin-top: 12px; }
+  .preview img { max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: contain; }
+  .preview .file-info { font-size: 0.75rem; color: #999; margin-top: 4px; }
+  .btn {
+    display: inline-block; padding: 12px 36px; border: none; border-radius: 8px;
+    font-size: 1rem; cursor: pointer; transition: background 0.2s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: #ff9933; color: #fff; }
+  .btn-primary:hover { background: #e67300; }
+  .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+  .btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+  .end-screen { text-align: center; padding: 60px 24px; }
+  .end-screen .icon { font-size: 3rem; margin-bottom: 16px; }
+  .end-screen h2 { font-size: 1.2rem; margin-bottom: 12px; color: #333; }
+  .end-screen p { font-size: 0.9rem; color: #666; line-height: 1.6; }
+  .progress { height: 4px; background: #eee; }
+  .progress-bar { height: 100%; background: #ff9933; transition: width 0.3s; }
+  .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .input-text { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; }
+  .input-text:focus { outline: none; border-color: #ff9933; }
+  @media (max-width: 480px) {
+    body { padding: 10px; }
+    .header { padding: 20px 16px; }
+    .header h1 { font-size: 1.1rem; }
+    .section { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>商品開発のためのユーザー調査 in インド</h1>
+  </div>
+  <div class="progress"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+
+  <!-- セクション0: 説明 + 写真提供可否 -->
+  <div class="section active" id="section0">
+    <h2>調査概要</h2>
+    <p class="description">
+      現在、インド企業の日本進出を考えるMoGプロジェクトに参加しています。<br>
+      そこで日本の文化である「名刺」に着目しています。皆さんの使われている名刺入れを参考にさせてください。<br><br>
+      明日までに多くの情報を集めたいです。どうぞお願いします。
+    </p>
+    <p class="note">
+      ※ 氏名・連絡先はインタビューに協力していただけると答えていただいた方のみ、連絡のため使用させていただきます。また、画像は商品開発の際の資料としてのみ使います。外部への発信は致しません。
+    </p>
+
+    <div class="question" style="margin-top: 24px;">
+      <label>あなたの名刺入れの写真を頂けますか？</label>
+      <div class="radio-group">
+        <label><input type="radio" name="canProvide" value="yes"><span>はい</span></label>
+        <label><input type="radio" name="canProvide" value="no"><span>いいえ</span></label>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnNext0" disabled onclick="handleSection0()">次へ</button>
+    </div>
+  </div>
+
+  <!-- セクション1: 写真アップロード + 質問 -->
+  <div class="section" id="section1">
+    <h2>名刺入れについて教えてください</h2>
+
+    <div class="question">
+      <label>名刺入れの外側の写真をお願いします</label>
+      <div class="upload-area" id="dropOuter">
+        <input type="file" accept="image/*" capture="environment" onchange="handleImage(this, 'outer')">
+        <div class="icon">&#128247;</div>
+        <div class="text">タップして写真を選択<br>またはドラッグ&ドロップ</div>
+      </div>
+      <div class="preview" id="previewOuter"></div>
+    </div>
+
+    <div class="question">
+      <label>名刺入れの内側の写真をお願いします</label>
+      <div class="upload-area" id="dropInner">
+        <input type="file" accept="image/*" capture="environment" onchange="handleImage(this, 'inner')">
+        <div class="icon">&#128247;</div>
+        <div class="text">タップして写真を選択<br>またはドラッグ&ドロップ</div>
+      </div>
+      <div class="preview" id="previewInner"></div>
+    </div>
+
+    <div class="question">
+      <label>名刺入れの値段はどのくらいでしたか？</label>
+      <div class="select-group">
+        <label><input type="radio" name="price" value="~3000円"><span>〜3,000円</span></label>
+        <label><input type="radio" name="price" value="3000~5000円"><span>3,000〜5,000円</span></label>
+        <label><input type="radio" name="price" value="5000~7000円"><span>5,000〜7,000円</span></label>
+        <label><input type="radio" name="price" value="7000~10000円"><span>7,000〜10,000円</span></label>
+        <label><input type="radio" name="price" value="10000~20000円"><span>10,000〜20,000円</span></label>
+        <label><input type="radio" name="price" value="20000~30000円"><span>20,000〜30,000円</span></label>
+        <label><input type="radio" name="price" value="それ以上"><span>それ以上</span></label>
+        <label><input type="radio" name="price" value="貰い物のためわからない"><span>貰い物のためわからない</span></label>
+      </div>
+    </div>
+
+    <div class="question">
+      <label>より詳しいユーザーインタビューを<br>3/20 17:30〜19:30 にしてもよろしいですか？</label>
+      <div class="radio-group">
+        <label><input type="radio" name="interview" value="yes"><span>はい</span></label>
+        <label><input type="radio" name="interview" value="no"><span>いいえ</span></label>
+      </div>
+    </div>
+
+    <!-- インタビューOKの場合のみ表示 -->
+    <div class="question" id="contactSection" style="display:none;">
+      <label>お名前</label>
+      <input type="text" class="input-text" id="userName" placeholder="山田 太郎">
+      <label style="margin-top: 12px;">連絡先（メールまたはLINE ID等）</label>
+      <input type="text" class="input-text" id="userContact" placeholder="example@mail.com">
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnSubmit" onclick="submitForm()">送信する</button>
+    </div>
+  </div>
+
+  <!-- 送信完了 -->
+  <div class="section" id="sectionDone">
+    <div class="end-screen">
+      <div class="icon">&#127881;</div>
+      <h2>ご協力ありがとうございます！</h2>
+      <p>皆さんの回答が、より良い商品開発に繋がります。<br>本当にありがとうございました。</p>
+    </div>
+  </div>
+
+  <!-- 写真なし終了 -->
+  <div class="section" id="sectionNo">
+    <div class="end-screen">
+      <div class="icon">&#128591;</div>
+      <h2>ご回答ありがとうございます</h2>
+      <p>お時間をいただきありがとうございました。<br>またの機会がございましたら、ぜひご協力をお願いいたします。</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 設定 =====
+// GASデプロイ後のURLをここに貼り付けてください
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyRHrmv0Dy7ZXDydyeMqwqzu084oQQAmJZZUNZqye9INhXEd-21CKPZxE-5JBqzH6hJ/exec';
+
+// ===== 画像処理 =====
+const MAX_WIDTH = 1200;
+const MAX_HEIGHT = 1200;
+const JPEG_QUALITY = 0.8;
+const imageData = { outer: null, inner: null };
+
+function processImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+
+        // リサイズ
+        if (w > MAX_WIDTH || h > MAX_HEIGHT) {
+          const ratio = Math.min(MAX_WIDTH / w, MAX_HEIGHT / h);
+          w = Math.round(w * ratio);
+          h = Math.round(h * ratio);
+        }
+
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        // canvasに描画することでEXIF（GPS等）は自動的に除去される
+        ctx.drawImage(img, 0, 0, w, h);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+        resolve(dataUrl);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleImage(input, type) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const previewEl = document.getElementById(type === 'outer' ? 'previewOuter' : 'previewInner');
+  previewEl.innerHTML = '<div class="text" style="color:#ff9933;">処理中...</div>';
+
+  try {
+    const dataUrl = await processImage(file);
+    imageData[type] = dataUrl;
+
+    const sizeKB = Math.round(dataUrl.length * 3 / 4 / 1024);
+    previewEl.innerHTML = `
+      <img src="${dataUrl}" alt="${type}">
+      <div class="file-info">リサイズ済み・メタデータ除去済み (約${sizeKB}KB)</div>
+    `;
+  } catch (err) {
+    previewEl.innerHTML = '<div class="text" style="color:red;">画像の処理に失敗しました。もう一度お試しください。</div>';
+  }
+}
+
+// ドラッグ&ドロップ
+['dropOuter', 'dropInner'].forEach(id => {
+  const el = document.getElementById(id);
+  const type = id === 'dropOuter' ? 'outer' : 'inner';
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('dragover'); });
+  el.addEventListener('dragleave', () => el.classList.remove('dragover'));
+  el.addEventListener('drop', e => {
+    e.preventDefault();
+    el.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+      el.querySelector('input').files = e.dataTransfer.files;
+      handleImage(el.querySelector('input'), type);
+    }
+  });
+});
+
+// ===== セクション制御 =====
+document.querySelectorAll('input[name="canProvide"]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.getElementById('btnNext0').disabled = false;
+  });
+});
+
+document.querySelectorAll('input[name="interview"]').forEach(r => {
+  r.addEventListener('change', function() {
+    document.getElementById('contactSection').style.display =
+      this.value === 'yes' ? 'block' : 'none';
+  });
+});
+
+function handleSection0() {
+  const val = document.querySelector('input[name="canProvide"]:checked').value;
+  document.getElementById('section0').classList.remove('active');
+  if (val === 'yes') {
+    document.getElementById('section1').classList.add('active');
+    document.getElementById('progressBar').style.width = '50%';
+  } else {
+    document.getElementById('sectionNo').classList.add('active');
+    document.getElementById('progressBar').style.width = '100%';
+  }
+}
+
+// ===== 送信 =====
+async function submitForm() {
+  const btn = document.getElementById('btnSubmit');
+  const price = document.querySelector('input[name="price"]:checked');
+  const interview = document.querySelector('input[name="interview"]:checked');
+
+  // バリデーション
+  if (!imageData.outer) { alert('名刺入れの外側の写真をアップロードしてください。'); return; }
+  if (!imageData.inner) { alert('名刺入れの内側の写真をアップロードしてください。'); return; }
+  if (!price) { alert('値段を選択してください。'); return; }
+  if (!interview) { alert('インタビューの可否を選択してください。'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>送信中...';
+
+  const payload = {
+    outerImage: imageData.outer,
+    innerImage: imageData.inner,
+    price: price.value,
+    interview: interview.value,
+    name: document.getElementById('userName').value || '',
+    contact: document.getElementById('userContact').value || '',
+    timestamp: new Date().toLocaleString('ja-JP')
+  };
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    document.getElementById('section1').classList.remove('active');
+    document.getElementById('sectionDone').classList.add('active');
+    document.getElementById('progressBar').style.width = '100%';
+  } catch (err) {
+    alert('送信に失敗しました。通信環境を確認して再度お試しください。');
+    btn.disabled = false;
+    btn.innerHTML = '送信する';
+  }
+}
+</script>
+</body>
+</html>
