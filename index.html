@@ -60,6 +60,13 @@
   .upload-area:hover, .upload-area.dragover { border-color: #ff9933; background: #fff8f0; }
   .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
   .upload-area .text { font-size: 0.85rem; color: #888; }
+  .upload-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn-upload {
+    flex: 1; min-width: 140px; padding: 14px 12px; background: #fff8f0; border: 2px solid #ff9933;
+    border-radius: 8px; color: #e67300; font-size: 0.9rem; font-weight: bold; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-upload:hover { background: #ffe0b2; }
   .preview { margin-top: 12px; }
   .preview img { max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: contain; }
   .preview .file-info { font-size: 0.75rem; color: #999; margin-top: 4px; }
@@ -127,18 +134,22 @@
 
     <div class="question">
       <label>名刺入れの外側の写真をお願いします</label>
-      <div class="upload-area" id="dropOuter">
-        <input type="file" accept="image/*" capture="environment" onchange="handleImage(this, 'outer')">
-        <div class="text">タップして写真を選択<br>またはドラッグ&ドロップ</div>
+      <div class="upload-buttons">
+        <button type="button" class="btn btn-upload" onclick="document.getElementById('outerCamera').click()">カメラで撮影</button>
+        <button type="button" class="btn btn-upload" onclick="document.getElementById('outerFile').click()">保存済みの写真から選択</button>
+        <input type="file" accept="image/*" capture="environment" id="outerCamera" style="display:none" onchange="handleImage(this, 'outer')">
+        <input type="file" accept="image/*" id="outerFile" style="display:none" onchange="handleImage(this, 'outer')">
       </div>
       <div class="preview" id="previewOuter"></div>
     </div>
 
     <div class="question">
       <label>名刺入れの内側の写真をお願いします</label>
-      <div class="upload-area" id="dropInner">
-        <input type="file" accept="image/*" capture="environment" onchange="handleImage(this, 'inner')">
-        <div class="text">タップして写真を選択<br>またはドラッグ&ドロップ</div>
+      <div class="upload-buttons">
+        <button type="button" class="btn btn-upload" onclick="document.getElementById('innerCamera').click()">カメラで撮影</button>
+        <button type="button" class="btn btn-upload" onclick="document.getElementById('innerFile').click()">保存済みの写真から選択</button>
+        <input type="file" accept="image/*" capture="environment" id="innerCamera" style="display:none" onchange="handleImage(this, 'inner')">
+        <input type="file" accept="image/*" id="innerFile" style="display:none" onchange="handleImage(this, 'inner')">
       </div>
       <div class="preview" id="previewInner"></div>
     </div>
@@ -259,22 +270,6 @@ async function handleImage(input, type) {
     previewEl.innerHTML = '<div class="text" style="color:red;">画像の処理に失敗しました。もう一度お試しください。</div>';
   }
 }
-
-// ドラッグ&ドロップ
-['dropOuter', 'dropInner'].forEach(id => {
-  const el = document.getElementById(id);
-  const type = id === 'dropOuter' ? 'outer' : 'inner';
-  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('dragover'); });
-  el.addEventListener('dragleave', () => el.classList.remove('dragover'));
-  el.addEventListener('drop', e => {
-    e.preventDefault();
-    el.classList.remove('dragover');
-    if (e.dataTransfer.files.length) {
-      el.querySelector('input').files = e.dataTransfer.files;
-      handleImage(el.querySelector('input'), type);
-    }
-  });
-});
 
 // ===== セクション制御 =====
 document.querySelectorAll('input[name="canProvide"]').forEach(r => {
