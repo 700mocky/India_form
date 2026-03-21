@@ -332,7 +332,7 @@ async function submitSurvey() {
   btn.innerHTML = '<span class="spinner"></span>送信中...';
 
   const payload = {
-    designs: Array.from(selectedDesigns).sort().join(', '),
+    designs: Array.from(selectedDesigns).sort().map(n => 'No.' + n).join(' / '),
     budgetSelf: budgetSelf ? budgetSelf.value : '',
     budgetGift: budgetGift ? budgetGift.value : '',
     purchase: purchase.value,
