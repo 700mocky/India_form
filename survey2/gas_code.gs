@@ -22,23 +22,25 @@ function doPost(e) {
       sheet.appendRow([
         'タイムスタンプ',
         '気に入ったデザイン',
+        '自分用予算',
         'プレゼント予算',
         '購入意向'
       ]);
-      sheet.getRange(1, 1, 1, 4).setFontWeight('bold');
+      sheet.getRange(1, 1, 1, 5).setFontWeight('bold');
       sheet.setFrozenRows(1);
     }
 
     sheet.appendRow([
       data.timestamp,
       data.designs,
-      data.budget,
+      data.budgetSelf,
+      data.budgetGift,
       data.purchase
     ]);
 
     const rowNum = sheet.getLastRow();
     if (rowNum === 2) {
-      sheet.autoResizeColumns(1, 4);
+      sheet.autoResizeColumns(1, 5);
     }
 
     return ContentService
