@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>名刺入れに関するアンケート</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+    background: #fff5eb;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+  }
+  .header {
+    background: linear-gradient(90deg, #ff9933, #e67300);
+    color: #fff;
+    padding: 28px 24px;
+    text-align: center;
+  }
+  .header h1 { font-size: 1.3rem; margin-bottom: 8px; }
+  .header p { font-size: 0.85rem; line-height: 1.6; opacity: 0.95; }
+  .section { padding: 24px; display: none; }
+  .section.active { display: block; }
+  .section h2 { font-size: 1.1rem; margin-bottom: 16px; color: #333; border-left: 4px solid #ff9933; padding-left: 12px; }
+  .description { font-size: 0.9rem; line-height: 1.7; color: #555; margin-bottom: 24px; }
+  .question { margin-bottom: 24px; }
+  .question label.q-label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; font-size: 0.95rem; }
+  .select-group label {
+    font-weight: normal;
+    display: block; padding: 8px 14px; border-radius: 6px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .select-group label:hover { background: #fff3e0; }
+  .select-group input:checked + span { color: #e67300; font-weight: bold; }
+  .btn {
+    display: inline-block; padding: 12px 36px; border: none; border-radius: 8px;
+    font-size: 1rem; cursor: pointer; transition: background 0.2s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: #ff9933; color: #fff; }
+  .btn-primary:hover { background: #e67300; }
+  .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+  .btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+  .end-screen { text-align: center; padding: 60px 24px; }
+  .end-screen h2 { font-size: 1.2rem; margin-bottom: 12px; color: #333; border-left: none; }
+  .end-screen p { font-size: 0.9rem; color: #666; line-height: 1.6; }
+  .progress { height: 4px; background: #eee; }
+  .progress-bar { height: 100%; background: #ff9933; transition: width 0.3s; }
+  .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* 画像グリッド */
+  .image-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .image-card {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .image-card:hover { transform: scale(1.02); }
+  .image-card.selected { border-color: #ff4d6d; }
+  .image-card img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+  }
+  .image-card .heart {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+  }
+  .image-card.selected .heart {
+    background: #ff4d6d;
+    color: #fff;
+    transform: scale(1.15);
+  }
+  .image-card .card-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    text-align: center;
+    padding: 4px;
+    font-size: 0.8rem;
+  }
+  .selection-count {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 20px;
+  }
+  .selection-count .count { color: #ff4d6d; font-weight: bold; }
+
+  /* ストーリー */
+  .story-box {
+    background: #fff8f0;
+    border-left: 4px solid #ff9933;
+    padding: 20px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: #444;
+  }
+
+  .price-highlight {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #e67300;
+    margin: 20px 0;
+    padding: 16px;
+    background: #fff8f0;
+    border-radius: 8px;
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 10px; }
+    .header { padding: 20px 16px; }
+    .header h1 { font-size: 1.1rem; }
+    .section { padding: 16px; }
+    .image-grid { gap: 10px; }
+    .image-card .heart { width: 30px; height: 30px; font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>名刺入れに関するアンケート</h1>
+    <p>ご協力よろしくお願いいたします</p>
+  </div>
+  <div class="progress"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+
+  <!-- セクション1: 名刺入れデザイン選択 -->
+  <div class="section active" id="section0">
+    <h2>気に入ったデザインを選んでください</h2>
+    <p class="description">以下の名刺入れの中から、気に入ったデザインを最大3つまで選んでください。ハートをタップして選択できます。</p>
+
+    <div class="selection-count">選択数: <span class="count" id="selectionCount">0</span> / 3</div>
+
+    <div class="image-grid" id="imageGrid">
+      <div class="image-card" onclick="toggleSelect(this, 1)">
+        <img src="Rectangle 6.png" alt="名刺入れ 1">
+        <div class="heart">&#9825;</div>
+        <div class="card-label">デザイン 1</div>
+      </div>
+      <div class="image-card" onclick="toggleSelect(this, 2)">
+        <img src="Rectangle 8.png" alt="名刺入れ 2">
+        <div class="heart">&#9825;</div>
+        <div class="card-label">デザイン 2</div>
+      </div>
+      <div class="image-card" onclick="toggleSelect(this, 3)">
+        <img src="Rectangle 9.png" alt="名刺入れ 3">
+        <div class="heart">&#9825;</div>
+        <div class="card-label">デザイン 3</div>
+      </div>
+      <div class="image-card" onclick="toggleSelect(this, 4)">
+        <img src="Rectangle 10.png" alt="名刺入れ 4">
+        <div class="heart">&#9825;</div>
+        <div class="card-label">デザイン 4</div>
+      </div>
+      <div class="image-card" onclick="toggleSelect(this, 5)">
+        <img src="Rectangle 11.png" alt="名刺入れ 5">
+        <div class="heart">&#9825;</div>
+        <div class="card-label">デザイン 5</div>
+      </div>
+      <div class="image-card" onclick="toggleSelect(this, 6)">
+        <img src="Rectangle 12.png" alt="名刺入れ 6">
+        <div class="heart">&#9825;</div>
+        <div class="card-label">デザイン 6</div>
+      </div>
+      <div class="image-card" onclick="toggleSelect(this, 7)">
+        <img src="Rectangle 13.png" alt="名刺入れ 7">
+        <div class="heart">&#9825;</div>
+        <div class="card-label">デザイン 7</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnNext0" disabled onclick="goToSection(1)">次へ</button>
+    </div>
+  </div>
+
+  <!-- セクション2: 予算 -->
+  <div class="section" id="section1">
+    <h2>名刺入れの予算について</h2>
+    <div class="question">
+      <label class="q-label">転職する仲間や、入社が決まった仲の良い後輩に名刺入れを送るなら、どのくらいの予算をつけますか？</label>
+      <div class="select-group">
+        <label><input type="radio" name="budget" value="1000~3000円"><span>1,000〜3,000円</span></label>
+        <label><input type="radio" name="budget" value="3000~5000円"><span>3,000〜5,000円</span></label>
+        <label><input type="radio" name="budget" value="5000~10000円"><span>5,000〜10,000円</span></label>
+        <label><input type="radio" name="budget" value="10000~20000円"><span>10,000〜20,000円</span></label>
+        <label><input type="radio" name="budget" value="20000~30000円"><span>20,000〜30,000円</span></label>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnNext1" disabled onclick="goToSection(2)">次へ</button>
+    </div>
+  </div>
+
+  <!-- セクション3: ストーリー + 購入意向 -->
+  <div class="section" id="section2">
+    <h2>この商品について</h2>
+
+    <div class="story-box">
+      先ほど選んでいただいた名刺入れは、インドの伝統を守り受け継ぐ職人が一つ一つ手作りした一品です。<br><br>
+      私はインドで彼らや彼らの作ったものに触れ、それらが価値のあるものだと確信しました。<br><br>
+      彼らは、ものを作ることを楽しいことだと話してくれました。特に、女性の方はいまだに働く機会が少ないです。彼女らにとっては働くこと自体が自由なことだそうです。そして、一番彼らが幸せなのは、自分が稼いだお金で、自分たちが夢見た、学校生活や結婚式を自分の子供にさせてあげることだそうです。<br><br>
+      この商品を買うことで日本のフェアトレードやエシカル市場が広がり、彼らをより幸せにすることができます。
+    </div>
+
+    <div class="price-highlight">販売予定価格: 8,000円</div>
+
+    <div class="question">
+      <label class="q-label">この金額の場合、購入を考えますか？</label>
+      <div class="select-group">
+        <label><input type="radio" name="purchase" value="自分用に買う"><span>自分用に買う</span></label>
+        <label><input type="radio" name="purchase" value="プレゼントとして買う"><span>プレゼントとして買う</span></label>
+        <label><input type="radio" name="purchase" value="自分用として高いため買わない"><span>自分用として高いため買わない</span></label>
+        <label><input type="radio" name="purchase" value="プレゼント用として高いため買わない"><span>プレゼント用として高いため買わない</span></label>
+        <label><input type="radio" name="purchase" value="ストーリーに魅力を感じないため買わない"><span>ストーリーに魅力を感じないため買わない</span></label>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnSubmit" onclick="submitSurvey()">送信する</button>
+    </div>
+  </div>
+
+  <!-- 送信完了 -->
+  <div class="section" id="sectionDone">
+    <div class="end-screen">
+      <h2>ご協力ありがとうございます！</h2>
+      <p>皆さんの回答が、より良い商品開発に繋がります。<br>本当にありがとうございました。</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 設定 =====
+// GASデプロイ後のURLをここに貼り付けてください
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbziSpzKetuxWooBI5vgNL6WjjgHOqejhX4gvN29YWruZUwwcZuc_V45RfPh9CC_iUh4/exec';
+
+// ===== デザイン選択 =====
+const selectedDesigns = new Set();
+
+function toggleSelect(card, id) {
+  if (card.classList.contains('selected')) {
+    card.classList.remove('selected');
+    card.querySelector('.heart').innerHTML = '&#9825;';
+    selectedDesigns.delete(id);
+  } else {
+    if (selectedDesigns.size >= 3) {
+      alert('選択できるのは最大3つまでです。');
+      return;
+    }
+    card.classList.add('selected');
+    card.querySelector('.heart').innerHTML = '&#9829;';
+    selectedDesigns.add(id);
+  }
+  document.getElementById('selectionCount').textContent = selectedDesigns.size;
+  document.getElementById('btnNext0').disabled = selectedDesigns.size === 0;
+}
+
+// ===== 予算ラジオ =====
+document.querySelectorAll('input[name="budget"]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.getElementById('btnNext1').disabled = false;
+  });
+});
+
+// ===== セクション制御 =====
+function goToSection(num) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('section' + num).classList.add('active');
+  const progress = Math.round((num / 3) * 100);
+  document.getElementById('progressBar').style.width = progress + '%';
+}
+
+// ===== 送信 =====
+async function submitSurvey() {
+  const purchase = document.querySelector('input[name="purchase"]:checked');
+  const budget = document.querySelector('input[name="budget"]:checked');
+
+  if (!purchase) { alert('購入意向を選択してください。'); return; }
+
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>送信中...';
+
+  const payload = {
+    designs: Array.from(selectedDesigns).sort().join(', '),
+    budget: budget ? budget.value : '',
+    purchase: purchase.value,
+    timestamp: new Date().toLocaleString('ja-JP')
+  };
+
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('sectionDone').classList.add('active');
+    document.getElementById('progressBar').style.width = '100%';
+  } catch (err) {
+    alert('送信に失敗しました。通信環境を確認して再度お試しください。');
+    btn.disabled = false;
+    btn.innerHTML = '送信する';
+  }
+}
+</script>
+</body>
+</html>
